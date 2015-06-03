@@ -1,0 +1,49 @@
+<Object runat=Server Scope=Application  ID=mc progID="MSWC.Counters"></Object>
+<script language="VBScript" runat="server">
+
+Sub Application_OnStart
+		Application.Lock
+		Application("all")=GetVisitsNum()
+		Application("online")=0
+Application.Unlock
+      
+	End Sub
+
+	Sub Session_OnStart
+               
+		Application.Lock
+		Application("all")=Application("all")+1
+		Application("online")= Application("online")+1
+		Application.Unlock
+	End Sub
+	Sub Session_OnEnd
+		Application.Lock
+		Application("online")= Application("online")-1
+		Application.Unlock
+	End Sub
+
+Sub Application_OnEnd
+	SaveVisitsNum()
+End Sub
+Function GetVisitsNum()
+	Set fso = Server.CreateObject ("Scripting.FileSystemObject")
+ 	Application ("strCounterFileName") = Server.MapPath ("counter.txt")
+	Set fsoCounterFile = fso. OpenTextFile(Application ("strCounterFileName"),1,FALSE,FALSE)
+	If (fsoCounterFile.AtEndofStream) then
+		GetVisitsNum = 0
+	Else 
+		GetVisitsNum = fsoCounterFile.ReadLine()
+	End if
+	fsoCounterFile.Close()
+End Function
+Function SaveVisitsNum()
+	set fso = Server.CreateObject("Scripting.FileSystemObject")
+	set fsoCounterFile = fso.CreateTextFile(Application("strCounterFileName"),TRUE,FALSE)
+	fsoCounterFile.WriteLine(Application("all"))
+	fsoCounterFile.Close()
+End Function
+
+
+
+</script>
+
